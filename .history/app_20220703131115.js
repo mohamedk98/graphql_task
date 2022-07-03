@@ -17,7 +17,6 @@ let posts = [
 
 /**Schema */
 const typeDefs = gql`
-# Post Schema
   type Post {
     id: String
     title: String
@@ -25,7 +24,6 @@ const typeDefs = gql`
     comments: [Comment]
   }
 
-  #Comment Schema
   type Comment {
     name: String
     content: String
@@ -79,7 +77,6 @@ const resolvers = {
       posts = postsAfterDeleteing;
       return "Deleted Successfully";
     },
-    /**Add comment to certain post */
     addComment:(_,{postId,name,content}) =>{
       let postToBeCommentedIndex = posts.findIndex((post) => post.id === postId);
       let comment = { name,content };

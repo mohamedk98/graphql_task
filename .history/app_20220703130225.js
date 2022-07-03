@@ -5,41 +5,30 @@ let posts = [
     id: "1",
     title: "The Awakening",
     text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy",
-    comments: [{ name: "Ahmed", content: "Great Post" }],
   },
   {
     id: "2",
     title: "City of Glass",
     text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy",
-    comments: [{ name: "Mohamed", content: "Give it 5" }],
   },
 ];
 
 /**Schema */
 const typeDefs = gql`
-# Post Schema
   type Post {
     id: String
     title: String
     text: String
-    comments: [Comment]
-  }
-
-  #Comment Schema
-  type Comment {
-    name: String
-    content: String
   }
 
   type Query {
     posts: [Post]
   }
-  # here we define the schema of the resolvers with its data types and parameters
+
   type Mutation {
-    createPost(title: String, text: String): Post # The : indicate the return type of thsi function
+    createPost(title: String, text: String): Post
     updatePost(id: String, title: String, text: String): String
     deletePost(id: String): String
-    addComment(postId:String,name:String,content:String):String
   }
 `;
 
@@ -59,7 +48,6 @@ const resolvers = {
       posts.push(newPost);
       return newPost;
     },
-    /**Update Post Function */
     updatePost: (_, { id, title, text }) => {
       let postToBeUpdatedIndex = posts.findIndex((post) => post.id === id);
       let postsUpdates = { id: id, title: title, text: text };
@@ -69,26 +57,16 @@ const resolvers = {
       posts[postToBeUpdatedIndex] = postsUpdates;
       return "Update Successfully";
     },
-    /**Delete Post Function */
     deletePost: (_, { id }) => {
       let postsAfterDeleteing = posts.filter((post) => post.id !== id);
       let postToBeDeletedIndex = posts.findIndex((post) => post.id === id);
       if (postToBeDeletedIndex === -1) {
         return "There is no post available to delete";
       }
+
       posts = postsAfterDeleteing;
       return "Deleted Successfully";
     },
-    /**Add comment to certain post */
-    addComment:(_,{postId,name,content}) =>{
-      let postToBeCommentedIndex = posts.findIndex((post) => post.id === postId);
-      let comment = { name,content };
-      if (postToBeCommentedIndex === -1) {
-        return "There is no post available to add comment";
-      }
-      posts[postToBeCommentedIndex].comments.push(comment)
-      return "Comment Added Successfully"
-    }
   },
 };
 

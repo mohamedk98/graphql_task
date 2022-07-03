@@ -5,30 +5,26 @@ let posts = [
     id: "1",
     title: "The Awakening",
     text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy",
-    comments: [{ name: "Ahmed", content: "Great Post" }],
   },
   {
     id: "2",
     title: "City of Glass",
     text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy",
-    comments: [{ name: "Mohamed", content: "Give it 5" }],
   },
 ];
 
 /**Schema */
 const typeDefs = gql`
-# Post Schema
   type Post {
     id: String
     title: String
     text: String
-    comments: [Comment]
+    comments:[Comment]
   }
 
-  #Comment Schema
   type Comment {
-    name: String
-    content: String
+    name:String,
+    content:String
   }
 
   type Query {
@@ -39,7 +35,6 @@ const typeDefs = gql`
     createPost(title: String, text: String): Post # The : indicate the return type of thsi function
     updatePost(id: String, title: String, text: String): String
     deletePost(id: String): String
-    addComment(postId:String,name:String,content:String):String
   }
 `;
 
@@ -79,16 +74,6 @@ const resolvers = {
       posts = postsAfterDeleteing;
       return "Deleted Successfully";
     },
-    /**Add comment to certain post */
-    addComment:(_,{postId,name,content}) =>{
-      let postToBeCommentedIndex = posts.findIndex((post) => post.id === postId);
-      let comment = { name,content };
-      if (postToBeCommentedIndex === -1) {
-        return "There is no post available to add comment";
-      }
-      posts[postToBeCommentedIndex].comments.push(comment)
-      return "Comment Added Successfully"
-    }
   },
 };
 

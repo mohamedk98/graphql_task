@@ -17,7 +17,6 @@ let posts = [
 
 /**Schema */
 const typeDefs = gql`
-# Post Schema
   type Post {
     id: String
     title: String
@@ -25,7 +24,6 @@ const typeDefs = gql`
     comments: [Comment]
   }
 
-  #Comment Schema
   type Comment {
     name: String
     content: String
@@ -39,7 +37,6 @@ const typeDefs = gql`
     createPost(title: String, text: String): Post # The : indicate the return type of thsi function
     updatePost(id: String, title: String, text: String): String
     deletePost(id: String): String
-    addComment(postId:String,name:String,content:String):String
   }
 `;
 
@@ -79,16 +76,6 @@ const resolvers = {
       posts = postsAfterDeleteing;
       return "Deleted Successfully";
     },
-    /**Add comment to certain post */
-    addComment:(_,{postId,name,content}) =>{
-      let postToBeCommentedIndex = posts.findIndex((post) => post.id === postId);
-      let comment = { name,content };
-      if (postToBeCommentedIndex === -1) {
-        return "There is no post available to add comment";
-      }
-      posts[postToBeCommentedIndex].comments.push(comment)
-      return "Comment Added Successfully"
-    }
   },
 };
 
