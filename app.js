@@ -1,4 +1,6 @@
 const { ApolloServer, gql } = require("apollo-server");
+const mongoose = require("mongoose");
+const PostsApi = require("./datasource");
 /**Database mockup */
 let posts = [
   {
@@ -17,7 +19,7 @@ let posts = [
 
 /**Schema */
 const typeDefs = gql`
-# Post Schema
+  # Post Schema
   type Post {
     id: String
     title: String
@@ -39,64 +41,55 @@ const typeDefs = gql`
     createPost(title: String, text: String): Post # The : indicate the return type of thsi function
     updatePost(id: String, title: String, text: String): String
     deletePost(id: String): String
-    addComment(postId:String,name:String,content:String):String
+    addComment(postId: String, name: String, content: String): String
   }
 `;
 
 /**Resolvers */
 const resolvers = {
   Query: {
-    posts: () => posts,
+    posts: (_, __, { dataSources }) => {
+      return dataSources.postsApi.getPosts();
+    },
   },
   Mutation: {
     /**Create Post Function */
-    createPost: (_, { title, text }) => {
-      let newPost = {
-        id: Math.floor(Math.random() * 100 + 1).toString(),
-        title: title,
-        text: text,
-      };
-      posts.push(newPost);
-      return newPost;
+    createPost: async (_, { title, text }, { dataSources }) => {
+      return dataSources.postsApi.createPost({ title, text });
     },
     /**Update Post Function */
-    updatePost: (_, { id, title, text }) => {
-      let postToBeUpdatedIndex = posts.findIndex((post) => post.id === id);
-      let postsUpdates = { id: id, title: title, text: text };
-      if (postToBeUpdatedIndex === -1) {
-        return "There is no post available to update";
-      }
-      posts[postToBeUpdatedIndex] = postsUpdates;
-      return "Update Successfully";
+    updatePost: (_, { id, title, text }, { dataSources }) => {
+      return dataSources.postsApi.updatePost({ id, title, text });
     },
     /**Delete Post Function */
-    deletePost: (_, { id }) => {
-      let postsAfterDeleteing = posts.filter((post) => post.id !== id);
-      let postToBeDeletedIndex = posts.findIndex((post) => post.id === id);
-      if (postToBeDeletedIndex === -1) {
-        return "There is no post available to delete";
-      }
-      posts = postsAfterDeleteing;
-      return "Deleted Successfully";
+    deletePost: (_, { id }, { dataSources }) => {
+      return dataSources.postsApi.deletePost(id);
     },
     /**Add comment to certain post */
-    addComment:(_,{postId,name,content}) =>{
-      let postToBeCommentedIndex = posts.findIndex((post) => post.id === postId);
-      let comment = { name,content };
-      if (postToBeCommentedIndex === -1) {
-        return "There is no post available to add comment";
-      }
-      posts[postToBeCommentedIndex].comments.push(comment)
-      return "Comment Added Successfully"
-    }
+    addComment: (_, { postId, name, content }, { dataSources }) => {
+      return dataSources.postsApi.addComment({ postId, name, content });
+    },
   },
 };
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  dataSources: () => {
+    return {
+      postsApi: new PostsApi(),
+    };
+  },
 });
 
 server.listen().then(() => {
   console.log("Graphql server is working");
+  mongoose
+    .connect("mongodb://localhost:27017") // Localhost mongodb
+    .then(() => {
+      console.log("Mongodb connected succesfully");
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 });
